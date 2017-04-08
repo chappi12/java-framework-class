@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="junit-4.12">
+  <library name="spring-tx-4.3.7.RELEASE">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/junit-4.12.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/spring-tx-4.3.7.RELEASE.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

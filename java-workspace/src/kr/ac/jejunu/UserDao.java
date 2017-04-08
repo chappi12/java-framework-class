@@ -1,56 +1,73 @@
 package kr.ac.jejunu;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+
 import java.sql.*;
 
+
 /**
- * Created by hyh0408 on 2017. 3. 15..
+ * Created by ce-416-17 on 2017. 3. 15..
  */
 public class UserDao {
-
-    private ConnectionMaker connectionMaker;
-
-    public UserDao(ConnectionMaker connectionMaker) {
-        this.connectionMaker = connectionMaker;
-    }
+    private JdbcTemplate jdbcTemplate;
+    private JdbcContext jdbcContext;
 
     public User get(Long id) throws ClassNotFoundException, SQLException {
-        Connection connection = connectionMaker.getConnection();
-
-        PreparedStatement preparedStatement = connection.prepareStatement("select * from userinfo where id = ?");
-        preparedStatement.setLong(1, id);
-        ResultSet resultSet = preparedStatement.executeQuery();
-
-        resultSet.next();
-
-        User user = new User();
-        user.setId(resultSet.getLong("id"));
-        user.setName(resultSet.getString("name"));
-        user.setPassword(resultSet.getString("password"));
-
-        resultSet.close();
-        preparedStatement.close();
-        connection.close();
-
-        return user;
+        String sql = "select * from userinfo where id = ?";
+        Object[] params = new Object[]{id};
+        User user1 = null;
+        try {
+            user1 = jdbcTemplate.queryForObject(sql, params, (resultSet, i) -> {
+                User user = new User();
+                user.setId(resultSet.getLong("id"));
+                user.setName(resultSet.getString("name"));
+                user.setPassword(resultSet.getString("password"));
+                return user;
+            });
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+        }
+        return user1;
     }
+
+
 
     public Long add(User user) throws ClassNotFoundException, SQLException {
-        Connection connection = connectionMaker.getConnection();
+        String sql = "insert into userinfo(name, password) VALUES (?,?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(2, user.getPassword());
+            return preparedStatement;
+        }, keyHolder);
+        return (Long) keyHolder.getKey();
+    }
 
-        PreparedStatement preparedStatement = connection.prepareStatement("insert into userinfo(name, password) VALUES (?,?)");
-        preparedStatement.setString(1, user.getName());
-        preparedStatement.setString(2, user.getPassword());
-        preparedStatement.executeUpdate();
+    public void update(User user) throws ClassNotFoundException, SQLException {
+        String sql = "update userinfo set name = ?, password = ? where id = ?";
+        Object[] params = new Object[]{user.getName(), user.getPassword(), user.getId()};
+        jdbcTemplate.update(sql, params);
+    }
 
-        preparedStatement = connection.prepareStatement("select last_insert_id()");
-        ResultSet resultSet = preparedStatement.executeQuery();
-        resultSet.next();
-        Long id = resultSet.getLong(1);
 
-        resultSet.close();
-        preparedStatement.close();
-        connection.close();
 
-        return id;
+
+    public void delete(Long id) throws ClassNotFoundException, SQLException {
+        String sql = "delete from userinfo where id = ?";
+        Object[] params = new Object[]{id};
+        jdbcTemplate.update(sql, params);
+    }
+
+
+    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 }
+
+//Dao Server가 죽어버리는 경우가 발생 >> Connection 중에 Exception이 발생하면 계속 Connection이 쌓임, 그러다가 Close가 나오기 전에 Full 되서 서버가 터짐
+
+//중복되는 코드지만 세부적인 부분이 틀리다면? 추상화 해주기 Ctrl + Alt + M (Refactor > Extract > Method
