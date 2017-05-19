@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/java-workspace.iml" filepath="$PROJECT_DIR$/java-workspace.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/java-workspace.iml" filepath="$PROJECT_DIR$/.idea/modules/java-workspace.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/java-workspace_main.iml" filepath="$PROJECT_DIR$/.idea/modules/java-workspace_main.iml" group="java-workspace" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/java-workspace_test.iml" filepath="$PROJECT_DIR$/.idea/modules/java-workspace_test.iml" group="java-workspace" />
     </modules>
   </component>
 </project>
